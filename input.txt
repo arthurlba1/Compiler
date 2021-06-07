@@ -1,0 +1,15 @@
+int main () {
+    
+    int variavelX;
+    int variavelY = variavelX;
+    int variavelZ = 1 + variavelX; 
+
+    while (variavelX < 1-2){
+        int varaivelZ;
+        if (variavelx < 1-2){
+            int varaivelZ;
+        } else {
+            int VariavelYSA;
+        }
+    }
+}
