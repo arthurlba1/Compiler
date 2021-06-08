@@ -1,14 +1,26 @@
 package src.syntactic;
 
 import src.exceptions.SyntaxException;
+import javafx.util.Pair;
+import src.exceptions.SemanticException;
 import src.lexical.*;
+import src.semantics.DictionarySemantics;
+import src.semantics.DictionaryStack;
+
 public class Parser {
     
     private TokenScanner scanner;
     private Token token;
+    //data
+    private String type, id, value;
+    private DictionarySemantics dic;
+    private DictionaryStack stack ;
     
     public Parser(TokenScanner scanner){
         this.scanner = scanner;
+        this.dic = new DictionarySemantics();
+        this.stack = new DictionaryStack();
+        this.stack.add(this.dic);
     }
 
 ////PROGRAMA
@@ -41,6 +53,7 @@ public class Parser {
         bloco();
 
         token = scanner.nextToken();
+
         if(!token.getText().equals("}")){
             throw new SyntaxException("You inserted: " + token.getText() +", '}' expected!");
         }
@@ -55,34 +68,56 @@ public class Parser {
 
 ///COMANDO
     public void comando () {
-        if(token.getText().equals("float") || token.getText().equals("char") || token.getText().equals("int")){
+        while(token.getText().equals("float") || token.getText().equals("char") || token.getText().equals("int") || token.getText().equals("=")
+        || token.getType() == Token.TK_IDENTIFIER || token.getText().equals("while") || token.getText().equals("if")){
+        
+            if(token.getText().equals("float") || token.getText().equals("char") || token.getText().equals("int")){
             comando_basico();
-        }
-        if(token.getText().equals("=")){
+            }
+            if(token.getText().equals("=")){
             atribuicao();
-        }
+            }
+            if(token.getType() == Token.TK_IDENTIFIER){
+                while(token.getType() == Token.TK_IDENTIFIER){
+                    id = token.getText();
+                    if(stack.peek().get(id) == null){
+                        throw new SemanticException("Variable not declared: " + id );
+                    }
+                    token = scanner.nextToken();
+                    if(token.getText().equals("=")){
+                        atribuicao();
+                        token = scanner.nextToken();
+                    }
+                    if(token.getText().equals("int") || token.getText().equals("float") || token.getText().equals("char") ){
+                        decl_var();
+                    }
+                }
+            }
+            if(token.getText().equals("while")){
+                iteracao();
+            }
 
-        if(token.getText().equals("while")){
-            iteracao();
-        }
+            if(token.getText().equals("if")){
+                if_expression();
+            }
+            if(token.getText().equals("}")){
+                stack.pop();
+            }
 
-        if(token.getText().equals("if")){
-            if_expression();
+            token = scanner.nextToken();
         }
-
     }
 
 //IF_EXPRESSION
     public void if_expression(){
-
         token = scanner.nextToken();
+
         if(!token.getText().equals("(")){
             throw new SyntaxException("You inserted: " + token.getText() +", '(' expected!");
         }
 
         exp_relacional();
 
-        
         if(!token.getText().equals(")")){
             throw new SyntaxException("You inserted: " + token.getText() +", ')' expected!");
         }
@@ -92,20 +127,21 @@ public class Parser {
             throw new SyntaxException("You inserted: " + token.getText() +", '{' expected!");
         }
 
+        stack.add(new DictionarySemantics(stack.peek()));
         token = scanner.nextToken();
         if(!token.getText().equals("{")){
             comando();
         }
 
-        if(!token.getText().equals("}")){
-            token = scanner.nextToken();
-        }
+        // if(!token.getText().equals("}")){
+        //     token = scanner.nextToken();
+        // }
         
-        if(!token.getText().equals("}")){
-            throw new SyntaxException("You inserted: " + token.getText() +", '}' expected!");
-        }
+        // if(!token.getText().equals("}")){
+        //     throw new SyntaxException("You inserted: " + token.getText() +", '}' expected!");
+        // }
 
-        token = scanner.nextToken();
+        // token = scanner.nextToken();
         if(!token.getText().equals("else")){
             throw new SyntaxException("You inserted: " + token.getText() +", 'else' expected!");
         }
@@ -115,6 +151,7 @@ public class Parser {
             throw new SyntaxException("You inserted: " + token.getText() +", '{' expected!");
         }
 
+        stack.add(new DictionarySemantics(stack.peek()));
         token = scanner.nextToken();
         if(!token.getText().equals("{")){
             comando();
@@ -137,6 +174,14 @@ public class Parser {
 //ATRIBUICAO
     public void atribuicao () {
         exp_arit();
+        Pair aux = stack.peek().get(id);
+        if(aux.getKey().toString().equals(type) || (type.equals("int") && aux.getKey().toString().equals("float"))){
+            aux = new Pair<String,String>(aux.getKey().toString(), value);
+            stack.peek().put(id,aux);
+        }
+        else{
+            throw new SemanticException("Incompatible type!\nVariable type: " + stack.peek().get(id).getKey() + " \ntrying to insert: " +type);
+        }
         if(!token.getText().equals(";")){
             throw new SyntaxException("You inserted: " + token.getText() +", ';' expected!");
         }
@@ -160,19 +205,20 @@ public class Parser {
             throw new SyntaxException("You inserted: " + token.getText() +", '{' expected!");
         }
 
+        stack.add(new DictionarySemantics(stack.peek()));
         token = scanner.nextToken();
-        
+
         if(!token.getText().equals("{")){
             comando();
         }
-
+        
         if(!token.getText().equals("}")){
             token = scanner.nextToken();
         }
-        
         if(!token.getText().equals("}")){
             throw new SyntaxException("You inserted: " + token.getText() +", '}' expected!");
         }
+        
     }
 
 
@@ -220,7 +266,27 @@ public class Parser {
 ///FATOR
     public void fator () {
         token = scanner.nextToken();
-        
+
+        if(token.getType() == Token.TK_NUMBER_FLOAT || token.getType() == Token.TK_NUMBER_INT){
+            //save the variable type
+            type = token.getType(); 
+            //save the value 
+            value = token.getText();
+        }
+        if(token.getType() == Token.TK_CHAR || token.getType() == Token.TK_IDENTIFIER){
+            String data = token.getText();
+            if(stack.peek().get(data) == null){
+                throw new SemanticException("Variable not declared: " +data);
+            }
+            type = stack.peek().get(data).getKey().toString();
+            value = stack.peek().get(data).getValue().toString();
+            
+            if(stack.peek().get(data).getValue().toString().equals("")) {
+                throw new SemanticException("Variable not initialized: " +data);
+            }
+ 
+        }
+
         if(token.getText().equals("(")){
             exp_arit();
             token = scanner.nextToken();
@@ -228,11 +294,9 @@ public class Parser {
                 throw new SyntaxException("You inserted: " + token.getText()+", ')' expected!");
             }
         }
-        
-        if(token.getType() != Token.TK_CHAR && token.getType() != Token.TK_NUMBER_FLOAT && token.getType() != Token.TK_NUMBER_INT && token.getType() != Token.TK_IDENTIFIER){
-            throw new SyntaxException("You inserted:" + token.getText() +", terminal expected!");
+        if(token.getType() != Token.TK_NUMBER_FLOAT && token.getType() == Token.TK_NUMBER_INT && token.getType() == Token.TK_IDENTIFIER && token.getType() == Token.TK_CHAR){
+            throw new SyntaxException("terminal expected!");
         }
-
     }
 
 ///EXP_RELACIONAL
@@ -248,6 +312,7 @@ public class Parser {
     public void decl_var () {
         tipo();
         id();
+        boolean declared = false;
         token = scanner.nextToken();
 
         if(!token.getText().equals(";") && !token.getText().equals("=")){
@@ -255,10 +320,22 @@ public class Parser {
         }
 
         if(token.getText().equals("=")){
+            if(stack.peek().get(id) == null){
+                stack.peek().put(id,new Pair<String,String>(type, ""));
+            } else {
+                throw new SemanticException("Variable already declared: " + id );
+            }
             comando();
+            declared = true;
         }
 
         if(token.getText().equals(";")){
+            if(!declared)
+            if(stack.peek().get(id) == null){
+                stack.peek().put(id,new Pair<String,String>(type, ""));
+            } else {
+                throw new SemanticException("Variable already declared: " + id );
+            }
             token = scanner.nextToken();
             if(token.getText().equals("float") || token.getText().equals("char") || token.getText().equals("int")){
                 decl_var();
@@ -272,6 +349,8 @@ public class Parser {
         if(!token.getText().equals("float") && !token.getText().equals("char") && !token.getText().equals("int")){
             throw new SyntaxException("You inserted: " + token.getText() +", Type expected!");
         }
+        //determines the variable type
+        type = token.getText();
     }
 
 ////ID    
@@ -280,5 +359,7 @@ public class Parser {
         if(token.getType() != Token.TK_IDENTIFIER){
             throw new SyntaxException("You inserted: " + token.getText() +"Identifier expected!");
         }
+        //determines the variable `name`
+        id = token.getText();
     }
 }
