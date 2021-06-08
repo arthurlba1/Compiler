@@ -18,8 +18,12 @@ public class Main {
         }  
         catch(LexicalException ex) {
             System.out.println("Lexical error: " + ex.getMessage());
-        } catch(Exception ex) {
-            System.out.println("Generic error");
         }
+        catch(SemanticException ex){
+            System.out.println("Semantic error: " + ex.getMessage());
+        }
+        catch(Exception ex) {
+            System.out.println("Generic error");
+        }   
     }
 }
