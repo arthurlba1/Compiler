@@ -52,8 +52,7 @@ public class Parser {
 
         bloco();
 
-        token = scanner.nextToken();
-
+        //token = scanner.nextToken();
         if(!token.getText().equals("}")){
             throw new SyntaxException("You inserted: " + token.getText() +", '}' expected!");
         }
@@ -103,10 +102,10 @@ public class Parser {
             if(token.getText().equals("}")){
                 stack.pop();
             }
-
-            token = scanner.nextToken();
+                //token = scanner.nextToken();
+            }
+            
         }
-    }
 
 //IF_EXPRESSION
     public void if_expression(){
@@ -133,15 +132,15 @@ public class Parser {
             comando();
         }
 
-        // if(!token.getText().equals("}")){
-        //     token = scanner.nextToken();
-        // }
+        if(!token.getText().equals("}")){
+            token = scanner.nextToken();
+        }
         
-        // if(!token.getText().equals("}")){
-        //     throw new SyntaxException("You inserted: " + token.getText() +", '}' expected!");
-        // }
+        if(!token.getText().equals("}")){
+            throw new SyntaxException("You inserted: " + token.getText() +", '}' expected!");
+        }
 
-        // token = scanner.nextToken();
+        token = scanner.nextToken();
         if(!token.getText().equals("else")){
             throw new SyntaxException("You inserted: " + token.getText() +", 'else' expected!");
         }
