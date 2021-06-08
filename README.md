@@ -10,7 +10,7 @@ The goal of the project is to understand how each part of a compiler works, from
 The image shows the lexico system used, which corresponds to each token. When set the token type, its state is given, whether it remains in that state or whether it will exchange.
 
 # Syntactic Analyzer
-![Banner](/img/SINTATICA.png?raw=true)
+![Banner](/img/SINTATICA (GLC).png?raw=true)
 
 This part consists of defining a context-free language to define the path that the compiler will take when executing its "code".
 It's essential because without it you only have tokens without purpose but with "type".
