@@ -1,14 +1,14 @@
 package src.lexical;
 
 public class Token {
-    public static final String TK_CHAR = "Char";
-    public static final String TK_IDENTIFIER = "Identificador";
-    public static final String TK_NUMBER_INT = "Inteiro";
-    public static final String TK_NUMBER_FLOAT = "Float";
-    public static final String TK_OPERATOR = "Relacional";
-    public static final String TK_ARITHMETIC = "Aritmético";
-    public static final String TK_SPECIAL_CHAR = "Especial";
-    public static final String TK_RESERVED_STRING = "Reservado";
+    public static final String TK_CHAR = "char";
+    public static final String TK_IDENTIFIER = "identifier";
+    public static final String TK_NUMBER_INT = "int";
+    public static final String TK_NUMBER_FLOAT = "float";
+    public static final String TK_OPERATOR = "relacional";
+    public static final String TK_ARITHMETIC = "arithmetic";
+    public static final String TK_SPECIAL_CHAR = "special";
+    public static final String TK_RESERVED_STRING = "reserved";
 
 
     public static final  String TK_TEXT[] = {
@@ -37,6 +37,7 @@ public class Token {
 
     //get's and set's 
 	public String getType() {
+
 		return type;
 	}
 

@@ -172,9 +172,9 @@ public class Analyzer {
                         token.setColumn(coluna - term.length());
                         return token;
                     }
-                    else{
-                        throw new LexicalException("Caracter especial mal formado");
-                    }
+                        // else{
+                        //     throw new LexicalException("Caracter especial mal formado");
+                        // }
                 case 7:
                     back();
                     token = new Token();
