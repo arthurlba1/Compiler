@@ -1,5 +1,7 @@
 package src.syntactic;
 
+import java.util.List;
+import java.util.ArrayList;
 import src.exceptions.SyntaxException;
 import javafx.util.Pair;
 import src.exceptions.SemanticException;
@@ -11,10 +13,18 @@ public class Parser {
     
     private TokenScanner scanner;
     private Token token;
+    
     //data
     private String type, id, value;
     private DictionarySemantics dic;
     private DictionaryStack stack ;
+
+    private String T = "";
+    private String y = "";
+    private String x = "";
+    private String op = "";
+    List<String> values;
+    List<String> ahrit;
     
     public Parser(TokenScanner scanner){
         this.scanner = scanner;
@@ -51,7 +61,6 @@ public class Parser {
         }
 
         bloco();
-
         //token = scanner.nextToken();
         if(!token.getText().equals("}")){
             throw new SyntaxException("You inserted: " + token.getText() +", '}' expected!");
@@ -172,7 +181,49 @@ public class Parser {
 
 //ATRIBUICAO
     public void atribuicao () {
+        values=new ArrayList<String>();
+        ahrit=new ArrayList<String>();
+        int tsun = 0;
         exp_arit();
+        int aux1 = 0;
+        while(aux1 <= ahrit.size()){
+            for(int i = 0; i < ahrit.size(); i++){
+                T = "T";
+                if(ahrit.get(i).equals("/") || ahrit.get(i).equals("*")){
+                    x = values.get(i);
+                    op = ahrit.get(i);
+                    values.remove(i);
+                    y = values.get(i);
+                    ahrit.remove(i);
+                    tsun++;
+                    T = T+tsun;
+                    values.set(i, T);
+                    System.out.println(T + " = " + x + " "+ op + " " + y);
+                }
+            }   
+        aux1++;
+        }
+        aux1 = 0;
+        while(aux1 <= ahrit.size()){
+            for(int i = 0; i < ahrit.size(); i++){
+                T = "T";
+                if(ahrit.get(i).equals("+") || ahrit.get(i).equals("-")){
+                    x = values.get(i);
+                    op = ahrit.get(i);
+                    values.remove(i);
+                    y = values.get(i);
+                    ahrit.remove(i);
+                    tsun++;
+                    T = T+tsun;
+                    values.set(i, T);
+                    System.out.println(T + " = " + x + " "+ op + " " + y);
+                }
+            }
+            aux1++;
+        }
+        if(values.size() > 1){
+            System.out.println(id + " = " + T);
+        }
         Pair aux = stack.peek().get(id);
         if(aux.getKey().toString().equals(type) || (type.equals("int") && aux.getKey().toString().equals("float"))){
             aux = new Pair<String,String>(aux.getKey().toString(), value);
@@ -250,7 +301,9 @@ public class Parser {
 ///TERMO_
     public void termo_ () {
         token = scanner.nextToken();
-        
+        if(token.getType() == Token.TK_ARITHMETIC){
+            ahrit.add(token.getText());
+        }
         if(token != null){
             if(token.getText().equals("*") || token.getText().equals("/")){
                 if(!token.getText().equals("*") && !token.getText().equals("/")){
@@ -265,7 +318,7 @@ public class Parser {
 ///FATOR
     public void fator () {
         token = scanner.nextToken();
-
+        values.add(token.getText());
         if(token.getType() == Token.TK_NUMBER_FLOAT || token.getType() == Token.TK_NUMBER_INT){
             //save the variable type
             type = token.getType(); 
