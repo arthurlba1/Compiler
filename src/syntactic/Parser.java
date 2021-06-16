@@ -221,7 +221,7 @@ public class Parser {
             }
             aux1++;
         }
-        if(values.size() > 1){
+        if(T.equals("T1")){
             System.out.println(id + " = " + T);
         }
         Pair aux = stack.peek().get(id);
