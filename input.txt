@@ -1,17 +1,16 @@
 int main () {
-    float variavelX;
-    variavelX = 1;
-    int variavelA;
-    variavelA = 99.9;
+    float varX;
+    varX = 1;
+    int varY = 1 + 2 * 3;
     
-    if ( variavelA < 100 ) {
+    if ( varX < 100 ) {
         int b;
     } else {
         int a;
     }
-    while (variavelX > 1.0) {
+    while (varX > 1.0) {
         int b = 0;
-        if ( variavelA < 100 ) {
+        if ( variavelY < 100 ) {
             int bc;
         } else {
             int a;
