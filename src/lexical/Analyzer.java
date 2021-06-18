@@ -64,11 +64,10 @@ public class Analyzer {
                     if(Util.isChar(charAtual) || Util.isUnderscore(charAtual) || Util.isDigit(charAtual)){
                         term += charAtual;
                             estado = 1;
-                    } else if (!Util.isChar(charAtual) || !Util.isUnderscore(charAtual) || !Util.isDigit(charAtual)) {
+                    } else if (isSpace(charAtual) || charAtual == ';'){
                         if(Util.isReserved(term)){
                             estado = 7;
-                        }
-                        else{ 
+                        } else { 
 						back();
                         token = new Token();
 					    token.setType(Token.TK_IDENTIFIER);
@@ -77,9 +76,9 @@ public class Analyzer {
 					    token.setColumn(coluna - term.length());
 					    return token;
                         }
-                    }
-                    else {
-                        throw new LexicalException("Identificador mal formado");
+                    } else {
+                        term += charAtual;
+                        throw new LexicalException(linha+": Malformed identifier: " + term);
                     }
                     break;
                 case 2:
@@ -91,7 +90,7 @@ public class Analyzer {
                         estado = 3;
                         term += charAtual;
                     }
-                    else if(!Util.isDigit(charAtual)){
+                    else if(isSpace(charAtual) || charAtual == ';'){
                         back();
                         token = new Token();
                         token.setType(Token.TK_NUMBER_INT);
@@ -99,16 +98,16 @@ public class Analyzer {
                         token.setLine(linha);
 					    token.setColumn(coluna - term.length());
                         return token;
-                    }
-                    else {
-                        throw new LexicalException("Inteiro mal formado");
+                    } else {
+                        term += charAtual;
+                        throw new LexicalException(linha+": Malformed integer: " + term);
                     }
                     break;
                 case 3:
                     if(Util.isDigit(charAtual)){
                         estado = 3;
                         term += charAtual;
-                    } else if(!Util.isDigit(charAtual)){
+                    } else if(isSpace(charAtual)||charAtual == ';'){
                         back();
                         token = new Token();
                         token.setType(Token.TK_NUMBER_FLOAT);
@@ -117,7 +116,8 @@ public class Analyzer {
 					    token.setColumn(coluna - term.length());
                         return token;
                     } else {
-                        throw new LexicalException("Número float mal formado");
+                        term += charAtual;
+                        throw new LexicalException(linha+": Malformed float: " + term);
                     }
                     break;
                 case 4:
@@ -186,8 +186,9 @@ public class Analyzer {
                 case 8: 
                     if(Util.isChar(charAtual)||Util.isDigit(charAtual)){
                         term += charAtual;
-                        nextChar();
-                        term += '\'';
+                    }
+                    if(charAtual == '\''){
+                        term += charAtual;
                         token = new Token();
                         token.setType(Token.TK_CHAR);
                         token.setText(term);
@@ -218,7 +219,7 @@ public class Analyzer {
     }
 
     private boolean isSpace(char c) {
-		if (c == '\n' || c== '\r') {
+		if (c == '\n') {
 			linha++;
 			coluna=0;
 		}
