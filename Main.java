@@ -14,16 +14,16 @@ public class Main {
 
         System.out.println("Compilation Successful!");
         }catch(SyntaxException ex) {
-            System.out.println("Syntax error: " + ex.getMessage());
+            System.err.println(" Syntax error\n " + ex.getMessage());
         }  
         catch(LexicalException ex) {
-            System.out.println("Lexical error: " + ex.getMessage());
+            System.err.println(" Lexical error\n " + ex.getMessage());
         }
         catch(SemanticException ex){
-            System.out.println("Semantic error: " + ex.getMessage());
+            System.err.println(" Semantic error\n " + ex.getMessage());
         }
         catch(Exception ex) {
-            System.out.println("Generic error");
+            System.err.println("Generic error");
         }   
     }
 }
