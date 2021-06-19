@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 import src.exceptions.SyntaxException;
 import javafx.util.Pair;
+import src.exceptions.LexicalException;
 import src.exceptions.SemanticException;
 import src.lexical.*;
 import src.semantics.DictionarySemantics;
@@ -64,6 +65,9 @@ public class Parser {
         //token = scanner.nextToken();
         if(!token.getText().equals("}")){
             throw new SyntaxException(token.getLine()+": You inserted: " +"'"+token.getText()+"'" +"\n '}' expected!");
+        }
+        if(token != null) {
+            throw new LexicalException("Out of scope");
         }
     }   
 
@@ -229,7 +233,7 @@ public class Parser {
             stack.peek().put(id,aux);
         }
         else{
-            throw new SemanticException("Incompatible type!\n Variable type: " + stack.peek().get(id).getKey() + " \n trying to insert: " +type);
+            throw new SemanticException(token.getLine()+": Incompatible type!\n Variable type: " + stack.peek().get(id).getKey() + " \n trying to insert: " +type);
         }
         if(!token.getText().equals(";")){
             throw new SyntaxException(token.getLine()+": You inserted: " +"'"+token.getText()+"'"+"\n ';' expected!");
@@ -328,13 +332,13 @@ public class Parser {
         if(token.getType() == Token.TK_CHAR || token.getType() == Token.TK_IDENTIFIER){
             String data = token.getText();
             if(stack.peek().get(data) == null){
-                throw new SemanticException("Variable not declared: " +data);
+                throw new SemanticException(token.getLine()+": Variable not declared: " +data);
             }
             type = stack.peek().get(data).getKey().toString();
             value = stack.peek().get(data).getValue().toString();
             
             if(stack.peek().get(data).getValue().toString().equals("")) {
-                throw new SemanticException("Variable not initialized: " +data);
+                throw new SemanticException(token.getLine()+": Variable not initialized: " +data);
             }
  
         }
